@@ -11,7 +11,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: ./example-app
@@ -65,7 +68,10 @@ jobs:
       run: poetry run task formatter
 
   security:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: build
     defaults:
       run:
@@ -93,7 +99,10 @@ jobs:
       run: poetry run task security
 
   lint:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: build
     defaults:
       run:
@@ -121,7 +130,10 @@ jobs:
       run: poetry run task lint
 
   unittests:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: [formatter, security, lint]
     defaults:
       run:
