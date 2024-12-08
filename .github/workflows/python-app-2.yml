@@ -40,7 +40,10 @@ jobs:
       
 
   formatter:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: build
     defaults:
       run:
