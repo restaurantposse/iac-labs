@@ -43,112 +43,49 @@ jobs:
       with:
         path: ./example-app/.venv
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-
-  formatter:
+          static_tests:
+    needs: setup
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        test_type: ['lint', 'formatter', 'security']
     runs-on: ${{ matrix.os }}
-    needs: build
-    defaults:
-      run:
-        working-directory: ./example-app
-
     steps:
-    - name: Install Poetry (Linux)
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-    - name: Install Poetry (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-        echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: ./example-app/.venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Install Dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      working-directory: ./example-app
-      run: poetry install --no-root
-    - name: Run formatter
-      run: poetry run task formatter
-
-  security:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    needs: build
-    defaults:
-      run:
-        working-directory: ./example-app
-
-    steps:
-    - name: Install Poetry (Linux)
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-    - name: Install Poetry (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-        echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: ./example-app/.venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Install Dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      working-directory: ./example-app
-      run: poetry install --no-root
-    - name: Run security checks
-      run: poetry run task security
-
-  lint:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    needs: build
-    defaults:
-      run:
-        working-directory: ./example-app
-
-    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
       - name: Install Poetry (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Install Poetry (Windows)
         if: runner.os == 'Windows'
         run: |
           (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
           echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          
       - name: Cache build venv
         id: cached-poetry-dependencies
         uses: actions/cache@v3
         with:
           path: ./example-app/.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+          
       - name: Install Dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         working-directory: ./example-app
         run: poetry install --no-root
-    - name: Run linting
-      run: poetry run task lint
-
+        
+      - name: Run ${{ matrix.test_type }}
+        working-directory: ./example-app
+        run: poetry run task ${{ matrix.test_type }}
   unittests:
     strategy:
       matrix:
