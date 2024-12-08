@@ -55,19 +55,27 @@ jobs:
         working-directory: ./example-app
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.12.1
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12.1"
-    - name: Install dependencies
+    - name: Install Poetry (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
       run: |
-        python -m pip install --upgrade pip
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    - name: Install Poetry (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+        echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Cache build venv
+      id: cached-poetry-dependencies
       uses: actions/cache@v3
       with:
         path: ./example-app/.venv
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+    - name: Install Dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      working-directory: ./example-app
+      run: poetry install --no-root
     - name: Run formatter
       run: poetry run task formatter
 
@@ -82,19 +90,27 @@ jobs:
         working-directory: ./example-app
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.12.1
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12.1"
-    - name: Install dependencies
+    - name: Install Poetry (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
       run: |
-        python -m pip install --upgrade pip
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    - name: Install Poetry (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+        echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Cache build venv
+      id: cached-poetry-dependencies
       uses: actions/cache@v3
       with:
         path: ./example-app/.venv
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+    - name: Install Dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      working-directory: ./example-app
+      run: poetry install --no-root
     - name: Run security checks
       run: poetry run task security
 
@@ -109,19 +125,27 @@ jobs:
         working-directory: ./example-app
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.12.1
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12.1"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-    - name: Cache build venv
-      uses: actions/cache@v3
-      with:
-        path: ./example-app/.venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Install Poetry (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install Poetry (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+          echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Cache build venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./example-app/.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Install Dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        working-directory: ./example-app
+        run: poetry install --no-root
     - name: Run linting
       run: poetry run task lint
 
@@ -136,18 +160,26 @@ jobs:
         working-directory: ./example-app
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.12.1
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12.1"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-    - name: Cache build venv
-      uses: actions/cache@v3
-      with:
-        path: ./example-app/.venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Run tests
-      run: poetry run task test
+      - name: Install Poetry (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install Poetry (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
+          echo "$env:APPDATA\Python\Scripts" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Cache build venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./example-app/.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Install Dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        working-directory: ./example-app
+        run: poetry install --no-root
+      - name: Run tests
+        run: poetry run task test
