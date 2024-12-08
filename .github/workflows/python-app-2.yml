@@ -43,8 +43,8 @@ jobs:
       with:
         path: ./example-app/.venv
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-          static_tests:
-    needs: setup
+  static_tests:
+    needs: build
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
