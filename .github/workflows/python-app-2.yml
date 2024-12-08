@@ -22,13 +22,13 @@ jobs:
         working-directory: ./example-app
         
     steps:
-    - name: Install Poetry Action
+    # - name: Install Poetry Action
     # You may pin to the exact commit or the version.
     # uses: snok/install-poetry@93ada01c735cc8a383ce0ce2ae205a21c415379b
-      uses: snok/install-poetry@v1.3.4
-      with:
+    #  uses: snok/install-poetry@v1.3.4
+    #  with:
         # The Poetry version to install
-        version: latest
+    #    version: latest
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
@@ -37,6 +37,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        curl -sSL https://install.python-poetry.org | python3 -
+        export PATH=$PATH:$HOME/.local/bin
+        poetry install --no-root
     - name: Run security checks
       working-directory: ./example-app
       run: poetry run task security
