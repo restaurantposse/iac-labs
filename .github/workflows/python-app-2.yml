@@ -43,8 +43,6 @@ jobs:
       with:
         path: ./example-app/.venv
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-      restore-keys: |
-        ${{ runner.os }}-venv-
 
   formatter:
     strategy:
