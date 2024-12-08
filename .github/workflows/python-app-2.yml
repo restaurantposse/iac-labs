@@ -57,14 +57,14 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: [formatter, security]
+    needs: build
     steps:
       - name: Run linting
         run: poetry run task lint
 
   unittests:
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [formatter, security, lint]
 
     steps:
       - name: Run tests
