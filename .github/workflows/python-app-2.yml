@@ -1,17 +1,17 @@
 name: Python application
-
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
 permissions:
   contents: read
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: ./example-app
@@ -28,6 +28,7 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH=$PATH:$HOME/.local/bin
         poetry install --no-root
+      shell: bash
     - name: Cache build venv
       id: cached-poetry-dependencies
       uses: actions/cache@v3
@@ -35,14 +36,15 @@ jobs:
         path: ./example-app/.venv
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
       
-
   formatter:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: build
     defaults:
       run:
         working-directory: ./example-app
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12.1
@@ -53,6 +55,7 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH=$PATH:$HOME/.local/bin
+      shell: bash
     - name: Install dependencies
       run: poetry install --no-root
     - name: Cache build venv
@@ -65,12 +68,14 @@ jobs:
       run: poetry run task formatter
 
   security:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ runner.os }}
     needs: build
     defaults:
       run:
         working-directory: ./example-app
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12.1
@@ -81,6 +86,7 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH=$PATH:$HOME/.local/bin
+      shell: bash
     - name: Install dependencies
       run: poetry install --no-root
     - name: Cache build venv
@@ -93,12 +99,14 @@ jobs:
       run: poetry run task security
 
   lint:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: build
     defaults:
       run:
         working-directory: ./example-app
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12.1
@@ -109,6 +117,7 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH=$PATH:$HOME/.local/bin
+      shell: bash
     - name: Install dependencies
       run: poetry install --no-root
     - name: Cache build venv
@@ -121,12 +130,14 @@ jobs:
       run: poetry run task lint
 
   unittests:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: [formatter, security, lint]
     defaults:
       run:
         working-directory: ./example-app
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12.1
@@ -137,6 +148,7 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH=$PATH:$HOME/.local/bin
+      shell: bash
     - name: Install dependencies
       run: poetry install --no-root
     - name: Cache build venv
