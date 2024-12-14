@@ -90,7 +90,94 @@ jobs:
       run: |
         poetry run task formatter
 
-  # Similar modifications for security, lint, and unittests jobs
+  security:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    needs: build
+    defaults:
+      run:
+        working-directory: ./example-app
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12.1
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12.1"
+    
+    - name: Install Poetry
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          curl -sSL https://install.python-poetry.org | python -
+          echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+        else
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        fi
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        poetry install --no-root
+    
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: ./example-app/.venv
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Run security checks
+      shell: bash
+      run: |
+        poetry run task security
+
+  lint:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    needs: build
+    defaults:
+      run:
+        working-directory: ./example-app
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12.1
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12.1"
+    
+    - name: Install Poetry
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          curl -sSL https://install.python-poetry.org | python -
+          echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+        else
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        fi
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        poetry install --no-root
+    
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: ./example-app/.venv
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Run linting
+      shell: bash
+      run: |
+        poetry run task lint
+
   unittests:
     strategy:
       matrix:
