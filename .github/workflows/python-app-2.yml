@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ runner.os }}
+    runs-on: ${{ matrix.os }}
     needs: build
     defaults:
       run:
